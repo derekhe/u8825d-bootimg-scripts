@@ -16,7 +16,7 @@ system ("find . | cpio -o -H newc | gzip > $dir/ramdisk-repack.cpio.gz");
 
 chdir $dir or die "$ARGV[1] $!";;
 
-system ("mkbootimg --cmdline 'no_console_suspend=1 console=null' --kernel $ARGV[0] --ramdisk ramdisk-repack.cpio.gz -o $ARGV[2]");
+system ("./mkbootimg --base 0x200000 --pagesize 2048 --cmdline 'androidboot.hardware=huawei loglevel=1' --kernel $ARGV[0] --ramdisk ramdisk-repack.cpio.gz -o $ARGV[2]");
 
 unlink("ramdisk-repack.cpio.gz") or die $!;
 
