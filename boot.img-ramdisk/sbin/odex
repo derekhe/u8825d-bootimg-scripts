@@ -1,0 +1,94 @@
+#!/system/bin/sh
+# By Genokolar 2011/02/07
+
+mount -o remount rw /system
+# open optimize
+if [ -d /system/etc/optimize-run ]
+then
+echo `busybox date +%F" "%T` Optimize is Open... >> /system/log.txt
+## SYSTEM optimize
+systemapk=`ls /system/app/*.apk`
+  for data in $systemapk 
+  do
+    if [ ! -e ${data%apk}odex ]
+    then
+    /system/bin/dexopt-wrapper $data $data.odex >> /system/log.txt
+    else
+    updates=`busybox find $data -newer ${data%apk}odex`
+    busybox rm -r ${updates%apk}odex
+    /system/bin/dexopt-wrapper $updates $updates.odex >> /system/log.txt
+    fi
+  done
+
+## SYSTEM rename apk.odex 2 odex
+system2odex=`ls /system/app/*.apk.odex`
+  for gendata in $system2odex;
+  do
+  mv $gendata ${gendata%apk.odex}odex
+  done
+
+## SYSTEM del remnants odex
+systemodex=`ls /system/app/*.odex`
+  for remodex in $systemodex 
+  do
+    if [ ! -e ${remodex%odex}apk ]
+    then
+    busybox rm -r $remodex
+    fi
+  done
+
+if [ -e /system/bin/dexopt-wrapper ]
+then
+busybox rm -rf /data/dalvik-cache/system@app@*
+fi
+
+# close optimize
+else
+  if [ -e /system/etc/delodex ]
+  then
+  busybox rm -rf /system/app/*.odex
+  busybox rm -f /system/etc/delodex
+  fi
+echo `busybox date +%F" "%T` Optimize closed... >> /system/log.txt
+fi
+
+# do preinstall job
+if [ ! -e /data/.notfirstrun ]
+then
+    echo "do preinstall sys" >> /system/log.txt
+    APKLIST=`ls /system/preinstall/*.apk`
+    for INFILES in $APKLIST
+    do
+      echo  setup package:$INFILES
+      pm install -r $INFILES
+    done
+    
+    DELPREINSTALL=`busybox grep DELPREINSTALL /system/etc/enhanced.conf |busybox cut -d= -f2 `
+    if [ $DELPREINSTALL = on ]
+    then
+        busybox rm -rf /system/preinstall
+        echo Del sys preinstall... >> /system/log.txt
+    fi
+ 
+    echo "do preinstall sd" >> /system/log.txt
+    APKLIST=`ls /sdcard/preinstall/*.apk`
+    for INFILES in $APKLIST
+    do
+      echo  setup package:$INFILES
+      pm install -r $INFILES
+    done
+
+    echo "do preinstall data" >> /system/log.txt
+    APKLIST=`ls /data/preinstall/*.apk`
+    for INFILES in $APKLIST
+    do
+      echo  setup package:$INFILES
+      pm install -r $INFILES
+    done
+    busybox rm -rf /data/preinstall
+    echo "do preinstall ok" >> /system/log.txt
+    busybox touch /data/.notfirstrun	
+fi
+
+echo "============================================" >> /system/log.txt
+exit

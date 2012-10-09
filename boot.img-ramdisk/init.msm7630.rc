@@ -1,0 +1,39 @@
+#/*< DTS2012020207408 yanzhijun 20120202 begin */
+#add something only for msm7630 platform
+#/* < DTS2012031506621 lishubin 20120321 begin */
+on emmc-fs
+# mount mmc partitions
+    wait /dev/block/mmcblk0p12
+#/*< DTS2012021003176 yanzhijun 20120210 begin */
+# merge DTS2011110902259 yanzhijun 
+    mount ext4 /dev/block/mmcblk0p12 /system ro barrier=1,nodelalloc
+    wait /dev/block/mmcblk0p13
+#del DTS2011100400385 for -fy will make large logs to use the ext4 volume
+    exec /system/bin/e2fsck -p /dev/block/mmcblk0p13
+    mount ext4 /dev/block/mmcblk0p13 /data nosuid nodev barrier=1 noauto_da_alloc,nodelalloc
+    mount ext4 /dev/block/mmcblk0p6 /cache nosuid nodev barrier=1,nodelalloc
+#/* DTS2012021003176 yanzhijun 20120210 end >*/ 
+#/* < DTS2011062804229 zengqiangsheng 20110630 begin */
+    exec /system/bin/iqcopy /system/etc/iq.img.vfat /data/iq.img.vfat
+    chown system system /data/iq.img.vfat
+    mkdir /data/app_iq_archive
+    chown system system /data/app_iq_archive
+    chmod 0640 /data/app_iq_archive
+    mount vfat loop@/data/iq.img.vfat /data/app_iq_archive rw nosuid nodev
+#/* DTS2011062804229 zengqiangsheng 20110630 end > */
+#/* <DTS2012021001488 yuanjintao 20120210 begin */
+    write /sys/module/block2mtd/parameters/block2mtd /dev/block/mmcblk0p7
+#/* DTS2012021001488 yuanjintao 20120210 end> */
+#/* DTS2012031506621 lishubin 20120321 end > */
+
+
+
+
+
+
+
+
+
+
+
+#/* DTS2012020207408 yanzhijun 20120202 end >*/
