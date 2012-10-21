@@ -29,9 +29,9 @@ loglevel 3
     export EXTERNAL_STORAGE /mnt/sdcard
     export ASEC_MOUNTPOINT /mnt/asec
     export LOOP_MOUNTPOINT /mnt/obb
-#/* <DTS2011053002680 zengpeiyu 20110526 begin*/
-    export BOOTCLASSPATH /system/framework/core.jar:/system/framework/core-junit.jar:/system/framework/bouncycastle.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar:/system/framework/apache-xml.jar:/system/framework/filterfw.jar:/system/framework/qcnvitems.jar:/system/framework/qcrilhook.jar
-#/* DTS2011053002680 zengpeiyu 20110526 end>*/
+
+    export BOOTCLASSPATH /system/framework/core.jar:/system/framework/core-junit.jar:/system/framework/bouncycastle.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/framework_ext.jar:/system/framework/android.policy.jar:/system/framework/services.jar:/system/framework/apache-xml.jar
+
 
 # Backward compatibility
     symlink /system/etc /etc
@@ -335,10 +335,6 @@ on post-fs-data
     chmod 0660 /dev/assd
     chown smartcard smartcard /dev/assd
 # DTS2012050802343 yanzhennan 20120508 end
-
-#add by geno
-    symlink /system/connectivity /data/connectivity
-
 on boot
 # basic network init
     ifup lo
@@ -1200,14 +1196,3 @@ service  cplusw  /system/xbin/cplusw
     class main
 #/* DTS2012030901188 yanhongfei 20120312 add paragon code end > */
 #/* DTS2012022206596 yanhongfei 20120223 add end > */
-
-#by geno
-
-service optimize /sbin/odex
-    disabled
-    oneshot
-
-on property:dev.bootcomplete=1
-    start optimize
-
-#by geno
